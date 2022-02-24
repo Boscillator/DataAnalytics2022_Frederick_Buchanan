@@ -2,7 +2,7 @@ library(ggplot2)
 library(dplyr)
 View(diamonds)
 
-diamonds2 <- diamonds %>% filter(carat == 0)
+diamonds2 <- diamonds %>% filter(carat != 0)
 
 attach(diamonds2)
 
