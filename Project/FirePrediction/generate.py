@@ -3,13 +3,14 @@ from FirePrediction.mcd64a1 import open_mcd64a1
 import argparse
 import numpy as np
 import os
-import calendar
-import datetime
 
 def main():
     args = parse_args()
+    np.random.seed(args.seed)
+
     raster = open_mcd64a1(args.year, args.month)
     sample = sample_fire_pixels(raster, args.n)
+
 
     if not os.path.exists('data/processed/cropped_and_sampled'):
         os.makedirs('data/processed/cropped_and_sampled')
@@ -21,14 +22,14 @@ def main():
         window, profile = crop(n, args.month, args.year, raster, x, y, args.size)
         fireband = raster.read(1, window=window)
         for ordinal in get_range_from_sample(fireband):
-            active_fire = fireband >= ordinal
+            active_fire = (fireband <= ordinal) & (fireband > 0)
+            active_tommorrow = (fireband <= ordinal + 1) & (fireband > 0)
             one_over = one_over_distance(fireband, ordinal)
 
             with rasterio.open(f'data/processed/cropped_and_sampled/{args.year}.{args.month:02d}.{n:02d}.{ordinal:03d}.tif', 'w', **profile) as dst:
-                dst.write(active_fire, 1)
-                dst.write(one_over * 1024, 2)
-
-
+                dst.write(active_tommorrow, 1)
+                dst.write(active_fire, 2)
+                dst.write(one_over * 1024, 3)
 
 def parse_args():
     parser = argparse.ArgumentParser(
@@ -36,7 +37,8 @@ def parse_args():
     parser.add_argument('--year', type=int, required=True)
     parser.add_argument('--month', type=int, required=True)
     parser.add_argument('--n', type=int, required=True)
-    parser.add_argument('--size', type=int, default=256)
+    parser.add_argument('--size', type=int, default=64)
+    parser.add_argument('--seed', type=int, default=42)
     return parser.parse_args()
 
 
@@ -66,21 +68,26 @@ def crop(n, month, year, raster, x, y, size):
         'height': size,
         'width': size,
         'transform': transform,
-        'count': 2
+        'count': 3
     })
 
     return window, profile
 
 def get_range_from_sample(data):
-    min = np.min(data[data > 0])
-    max = np.max(data[data > 0])
-    return range(min, max+1)
+    mmin = np.min(data[data > 0])
+    mmax = np.max(data[data > 0])
+    return range(mmin, mmax+1)
 
-def one_over_distance(fireband, ordinal):
-    fireband = fireband.copy()
-    fireband -= ordinal
-    fireband[fireband <= 0] = 0
+def one_over_distance(fireband_original, ordinal):
+    fireband = fireband_original.copy()
+    fireband[fireband_original > ordinal] = 0
+    fireband[fireband_original <= 0] = 0
+    fireband = ordinal - fireband
     fireband = 1/fireband
+
+    fireband[fireband_original > ordinal] = 0
+    fireband[fireband_original <= 0] = 0
+
     return np.nan_to_num(fireband)
 
 if __name__ == '__main__':
