@@ -80,15 +80,15 @@ def get_range_from_sample(data):
 
 def one_over_distance(fireband_original, ordinal):
     fireband = fireband_original.copy()
-    fireband[fireband_original > ordinal] = 0
-    fireband[fireband_original <= 0] = 0
+
     fireband = ordinal - fireband
     fireband = 1/fireband
 
     fireband[fireband_original > ordinal] = 0
     fireband[fireband_original <= 0] = 0
 
-    return np.nan_to_num(fireband)
+    fireband = np.nan_to_num(fireband, nan=0.0, posinf=0.0, neginf=0.0)
+    return fireband
 
 if __name__ == '__main__':
     main()

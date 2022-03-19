@@ -1,7 +1,6 @@
 import datetime
 import pathlib
 import rasterio
-from pydoc import cli
 import paramiko
 import os
 
