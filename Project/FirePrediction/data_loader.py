@@ -10,7 +10,7 @@ from pprint import pprint
 
 class FireSequence(Sequence):
 
-    def __init__(self, folder: pathlib.Path, batch_size: int, differential=True):
+    def __init__(self, folder: pathlib.Path, batch_size: int, differential=False):
         self.files = list(iterate_folder(folder))
         random.shuffle(self.files)
         self.batch_size = batch_size
@@ -21,6 +21,10 @@ class FireSequence(Sequence):
 
     def on_epoch_end(self):
         random.shuffle(self.files)
+
+    def meta_for(self, idx):
+        files = self.files[idx*self.batch_size:(idx+1)*self.batch_size]
+        return files
 
     def __getitem__(self, idx):
         files = self.files[idx*self.batch_size:(idx+1)*self.batch_size]

@@ -6,7 +6,7 @@ import keras
 from FirePrediction.data_loader import FireSequence
 import matplotlib.pyplot as plt
 
-BATCH_SIZE = 50
+BATCH_SIZE = 100
 
 def build_model(size, input_layers):
     model = models.Sequential()
@@ -48,7 +48,7 @@ def visualize(model):
         plt.show()
 
 
-def weighted_bincrossentropy(true, pred, weight_zero = 0.003, weight_one = 1):
+def weighted_bincrossentropy(true, pred, weight_zero = 0.05, weight_one = 1):
     """
     Calculates weighted binary cross entropy. The weights are fixed.
         
@@ -87,7 +87,7 @@ def main():
     )
 
     print(model.summary())
-    model.fit(training_generator, epochs=10, validation_data=validation_generator)
+    model.fit(training_generator, epochs=5, validation_data=validation_generator)
 
     model.save('data/model')
 
