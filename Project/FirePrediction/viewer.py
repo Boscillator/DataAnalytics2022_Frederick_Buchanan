@@ -17,7 +17,7 @@ def main():
     if args.band is None:
         bands = list(f.indexes)
     else:
-        bands  = [args.band]
+        bands = [args.band]
 
     if not args.tile:
         sequence(f, bands)
@@ -35,6 +35,7 @@ def sequence(f, bands):
         plt.colorbar()
         plt.show()
 
+
 def tile(f, bands):
     columns = 2
     rows = math.ceil(len(bands)/2)
@@ -45,8 +46,13 @@ def tile(f, bands):
         print(band, ax)
         ax.imshow(f.read(band))
         ax.set_title(f"band: {band}")
-    
+
+    if len(bands) % 2 == 1:
+        axs[-1].axis('off')
+
+    plt.tight_layout()
     plt.show()
+
 
 if __name__ == '__main__':
     main()

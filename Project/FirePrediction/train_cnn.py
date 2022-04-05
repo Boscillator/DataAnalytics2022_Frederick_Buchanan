@@ -5,6 +5,7 @@ from keras import layers, models, initializers, losses, metrics
 import keras
 from FirePrediction.data_loader import FireSequence
 import matplotlib.pyplot as plt
+import os
 
 BATCH_SIZE = 100
 
@@ -21,32 +22,6 @@ def build_model(size, input_layers):
     model.add(layers.Conv2D(1, (5,5), padding='same', activation='relu'))
     model.add(layers.Activation('sigmoid'))
     return model
-
-def cust_accuracy(y_true, y_pred):
-    y_true = tf.squeeze(y_true)
-    y_pred = tf.squeeze(y_pred)
-
-    y_pred = tf.cast(y_pred > 0.5, dtype=tf.float32)
-    t = tf.cast(y_pred == y_true, dtype=tf.float32)
-    return tf.reduce_sum(t) / tf.cast(tf.size(t), dtype=tf.float32)
-
-def visualize(model):
-    training_generator = FireSequence(pathlib.Path('data/processed/test'), 5)
-    Xs, ys = training_generator[0]
-    ys_pred = model.predict_on_batch(Xs)
-    for b in range(ys.shape[0]):
-        y = ys[b,:].reshape(64,64)
-        x = Xs[b,:,:,0]
-        y_pred = ys_pred[b,:].reshape(64,64)
-        f, axs = plt.subplots(1,3)
-        axs[0].imshow(x)
-        axs[0].set_title("Source")
-        axs[1].imshow(y)
-        axs[1].set_title("Truth")
-        axs[2].imshow(y_pred)
-        axs[2].set_title("Predicted")
-        plt.show()
-
 
 def weighted_bincrossentropy(true, pred, weight_zero = 0.05, weight_one = 1):
     """
@@ -76,7 +51,7 @@ def weighted_bincrossentropy(true, pred, weight_zero = 0.05, weight_one = 1):
     return keras.backend.mean(weighted_bin_crossentropy)
 
 def main():
-    model = build_model(64, 5)
+    model = build_model(64, 6)
     training_generator = FireSequence(pathlib.Path('data/processed/train'), BATCH_SIZE)
     validation_generator = FireSequence(pathlib.Path('data/processed/validate'), BATCH_SIZE)
 
@@ -89,12 +64,10 @@ def main():
     print(model.summary())
     model.fit(training_generator, epochs=5, validation_data=validation_generator)
 
-    model.save('data/model')
+    if not os.path.exists('data/models'):
+        os.makedirs('data/models')
 
-
-    # weights = model.layers[-3].get_weights()
-    # print(weights)
-    visualize(model)
+    model.save('data/models/simple_cnn')
 
 if __name__ == '__main__':
     main()

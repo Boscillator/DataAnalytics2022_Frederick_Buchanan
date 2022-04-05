@@ -29,7 +29,7 @@ def main():
             with rasterio.open(f'data/processed/cropped_and_sampled/{args.year}.{args.month:02d}.{n:02d}.{ordinal:03d}.tif', 'w', **profile) as dst:
                 dst.write(active_tommorrow, 1)
                 dst.write(active_fire, 2)
-                dst.write(one_over * 1024, 3)
+                dst.write(one_over * 4096, 3)
 
 def parse_args():
     parser = argparse.ArgumentParser(
