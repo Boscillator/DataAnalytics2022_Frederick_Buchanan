@@ -28,6 +28,10 @@ def iterate_folder(path: Union[str, pathlib.Path]) -> Iterator[DataPoint]:
             path=path / name
         )
 
+def ensure_exists(folder):
+    if not os.path.exists(folder):
+        os.makedirs(folder)
+
 
 if __name__ == '__main__':
     for item in iterate_folder(pathlib.Path('data/processed/cropped_and_sampled')):

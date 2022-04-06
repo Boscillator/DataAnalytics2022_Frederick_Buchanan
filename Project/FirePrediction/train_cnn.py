@@ -57,17 +57,17 @@ def main():
 
     model.compile(
         optimizer='adam',
-        loss=weighted_bincrossentropy,
+        loss='binary_crossentropy',
         metrics=['accuracy', metrics.Precision(thresholds=0.5), metrics.Recall(thresholds=0.5)]
     )
 
     print(model.summary())
-    model.fit(training_generator, epochs=5, validation_data=validation_generator)
+    model.fit(training_generator, epochs=10, validation_data=validation_generator)
 
     if not os.path.exists('data/models'):
         os.makedirs('data/models')
 
-    model.save('data/models/simple_cnn')
+    model.save('data/models/unweighted_simple_cnn')
 
 if __name__ == '__main__':
     main()

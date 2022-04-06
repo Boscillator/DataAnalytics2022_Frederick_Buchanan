@@ -1,0 +1,9 @@
+Total pixels on fire: 2,355,031.0
+Total pixels spread: 207,539.0
+Total pixels: 23,195,648
+Total pixels not on fire: 20,840,617.0
+Average temperature: -47.0907096862793
+Minimum temperature: -9999.0
+Maximum temperature: 9930.0
+Probability a pixel change from not on fire to on fire: 1.00%
+Average Spread: 36.64824295043945

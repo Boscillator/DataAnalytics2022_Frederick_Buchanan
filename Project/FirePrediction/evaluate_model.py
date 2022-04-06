@@ -6,8 +6,10 @@ import matplotlib.pyplot as plt
 import pathlib
 import os
 
+from keras.utils.vis_utils import plot_model
 from FirePrediction.data_loader import FireSequence
 from FirePrediction.train_cnn import weighted_bincrossentropy
+from FirePrediction.util import ensure_exists
 
 
 def main():
@@ -20,24 +22,36 @@ def main():
     test_generator = FireSequence('data/processed/test', 10)
 
     evaluation = model.evaluate(test_generator, verbose=1)
-    for name, value in zip(model.metrics_names, evaluation):
-        print(f"{name}: {value}")
+        
+    ensure_exists('plots/reports')
+    with open(f'plots/reports/{args.model.name}.txt', 'w') as f:
+        f.write(f"{args.model.name}\n")
+        f.write("========================\n")
+        
+        for name, value in zip(model.metrics_names, evaluation):
+            print(f"{name}: {value}")
+            f.write(f"{name}: {value}\n")
 
     if not os.path.exists("plots/evaluation"):
         os.makedirs("plots/evaluation")
 
-    for i in range(len(test_generator)):
-        Xs, ys = test_generator[i]
-        ys_pred = model.predict_on_batch(Xs)
-        meta = test_generator.meta_for(i)
+    ensure_exists("plots/arch")
 
-        for j in range(5):
-            xs_ = Xs[j,:,:,0]
-            ys_ = ys[j,:,:]
-            ys_pred_ = ys_pred[j,:,:,0] > 0.5
-            plot_prediction(xs_, ys_, ys_pred_, ys_pred[j,:,:,0], meta[j])
 
-def plot_prediction(xs, ys, ys_pred, full_predictions, meta):
+    i = 1
+    Xs, ys = test_generator[i]
+    ys_pred = model.predict_on_batch(Xs)
+    meta = test_generator.meta_for(i)
+
+    plot_model(model, to_file=f"plots/arch/{args.model.name}.png", show_shapes=True)
+
+    for j in range(5):
+        xs_ = Xs[j,:,:,0]
+        ys_ = ys[j,:,:]
+        ys_pred_ = ys_pred[j,:,:,0] > 0.5
+        plot_prediction(xs_, ys_, ys_pred_, ys_pred[j,:,:,0], meta[j], args.model.name)
+
+def plot_prediction(xs, ys, ys_pred, full_predictions, meta, model_name):
     true_positives = np.logical_and(ys, ys_pred)
     false_positives = np.logical_and(np.logical_not(ys), ys_pred)
     true_negatives = np.logical_and(np.logical_not(ys), np.logical_not(ys_pred))
@@ -80,7 +94,7 @@ def plot_prediction(xs, ys, ys_pred, full_predictions, meta):
     axs[8].imshow(false_positive_spread)
     axs[8].set_title("False positive spread")
 
-    plt.show()
+    fig.savefig(f"plots/evaluation/{model_name}_{meta.year}_{meta.ordinal_day}_{meta.sample_no}.png")
 
 
 def old_style_plots(model, i, Xs, ys, ys_pred, meta):

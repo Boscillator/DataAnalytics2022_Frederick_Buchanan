@@ -6,3 +6,4 @@
 6) https://arxiv.org/abs/1505.04597
 7) https://www.ncei.noaa.gov/products/climate-data-records/normalized-difference-vegetation-index
 8) Kalnay et al.,The NCEP/NCAR 40-year reanalysis project, Bull. Amer. Meteor. Soc., 77, 437-470, 1996.
+9) https://arxiv.org/pdf/1611.07004.pdf

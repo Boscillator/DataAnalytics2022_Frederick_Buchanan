@@ -11,8 +11,22 @@ import os
 
 BATCH_SIZE = 100
 
+def build_discriminator(size, input_layers):
+    # Taken from https://machinelearningmastery.com/how-to-develop-a-pix2pix-gan-for-image-to-image-translation/
+    in_src_image = layers.Input(shape=(size,size,input_layers))
+    in_target_image = layers.Input(shape=(size,size))
 
-def build_model(size, input_layers, start_neurons=16):
+    merged = layers.concatenate([in_src_image, in_target_image])
+
+    d = layers.Conv2D(64, (4,4), stride=(2,2), padding='same')(merged)
+    d = layers.LeakyReLU(alpha=0.2)(d)
+    d = layers.Conv2D(128, (4,4), stride=(2,2), padding='same')(d)
+    d = layers.BatchNormalization()(d)
+    d = layers.LeakyReLU(alpha=0.2)(d)
+    d = layers.Conv2D(512, (4,4), strides=(2,2), padding='same')(d)
+    
+
+def build_unet(size, input_layers, start_neurons=16):
     # Taken from: https://towardsdatascience.com/unet-line-by-line-explanation-9b191c76baf5
     input_layer = layers.Input((size, size, input_layers))
     batch_norm = layers.BatchNormalization()(input_layer)
@@ -129,7 +143,7 @@ def main():
     if not os.path.exists('data/models'):
         os.makedirs('data/models')
 
-    model.save('data/models/unet')
+    model.save('data/models/pix2pix')
 
 
 if __name__ == '__main__':
